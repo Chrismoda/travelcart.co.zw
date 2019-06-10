@@ -55,12 +55,7 @@ include "includes/db.php"; ?>
 						<div class="input-group">
 							<div class="input-group-btn">
 								<a href="bus_info.php?bus_id=<?php echo $post_id ?>" class="btn btn-info">Read More</a>
-<?php if(func::checkLoginState($dbh)){
-	?>
-									<a href="bookNow.php?bus=<?php echo $post_id ?>&user=<?php echo $_COOKIE['username']; ?>" class="btn btn-default">Book Now</a>
-
-	<?php
-} ?>							</div>
+							</div>
 						</div>
                         <hr>
                     <?php } ?>      
