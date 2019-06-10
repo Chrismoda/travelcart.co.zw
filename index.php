@@ -3,8 +3,35 @@ session_start();
 include "includes/db.php";
 include_once("includes/config.php");
 include_once("includes/functions.php");
- ?>
-<?php include "includes/header.php"; ?>
+include "includes/header.php"; 
+
+
+
+
+
+if(func::checkLoginState($dbh)){
+	//user is logged in, now search for unpaid up bookings and calculate days,
+	$us = $_SESSION['username'];
+	$uql = "SELECT * FROM `orders` WHERE `user_name`='$us' AND `date` < now()";
+	$uqqry = mysqli_query($dbc, $uql);
+	if (mysqli_num_rows($uqqry) != 0) {
+		#check status
+		while ($rs = mysqli_fetch_assoc($uqqry)) {
+			$dat = $rs['date'];
+			if ($rs['paid'] == 0) {
+				# code...
+			}elseif ($rs['paid'] == 1) {
+				# code...
+			}
+		}
+
+	}
+
+
+}
+
+
+?>
     
     <!-- Navigation -->
     <?php include "includes/navigation.php"; ?>
