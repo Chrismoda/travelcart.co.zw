@@ -208,7 +208,6 @@ if(func::checkLoginState($dbh)){
 										<div class="input-group">
 											<div class="input-group-btn">
 												<a href="bus_info.php?bus_id=<?php echo $rs['post_id']; ?>" class="btn btn-info">Read More</a>
-												<a href="bookNow.php?bus=<?php echo $rs['post_id']; ?>&user=<?php echo $_COOKIE['username']; ?>" class="btn btn-default">Book Now</a>
 											</div>
 										</div>
 									</div>
