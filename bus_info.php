@@ -86,7 +86,20 @@ include "includes/db.php"; ?>
 															<?php if(func::checkLoginState($dbh)){
 																
 																?>
-																	<a href="bookNow.php?bus=<?php echo $_GET['bus_id']; ?>&user=<?php echo $_COOKIE['username']; ?>" class="btn btn-default">Book Now</a>
+                                                                <form action="bookNow.php" method="get">
+                                                                    <ul class=" list-inline input-group">
+                                                                        <li class="list-inline-item text-danger"><label for="dt"><h5 style="color: #000;" ><strong>Enter Date</strong></h5></label></li>
+                                                                        <li class="list-inline-item"><input type="text" class="form-control" placeholder="2019-04-29" style="width: 100px;"  name="dt" id="dt" required></li>
+                                                                    </ul>
+                                                                   
+                                                                    <input type="hidden" name="bus" value="<?php echo $_GET['bus_id']; ?>" >
+                                                                    <input type="hidden" name="user" value="<?php echo $_COOKIE['username']; ?>">
+                                                                    <hr>
+                                                                    <div class="input-group">
+                                                                        <button class="btn btn-default">Book Now</button>
+                                                                    </div>
+                                                                    
+                                                                </form>
 
 																<?php
 															} ?>

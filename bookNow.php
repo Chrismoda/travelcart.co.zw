@@ -4,7 +4,7 @@ include_once("includes/functions.php");
 
 $bID = func::escape_data($dbc, $_GET['bus']);
 $user = func::escape_data($dbc, $_GET['user']);
-
+$dt = func::escape_data($dbc, $_GET['dt']);
 $uql = "SELECT * FROM `lgt` WHERE `emtl`='$user'";
 $ury = mysqli_query($dbc, $uql);
 $urs = mysqli_fetch_assoc($ury);
@@ -25,7 +25,7 @@ if(mysqli_num_rows($osry) > 0){
 	exit();
 }
 if(isset($_GET['bus']) && isset($_GET['user'])){
-	$sql = "INSERT INTO `orders`(`order_id`, `bus_id`, `user_id`, `user_name`, `date`, `cost`, `paid`) VALUES ('','$bID','$usID','$user',now(),'$fee', '0')";
+	$sql = "INSERT INTO `orders`(`order_id`, `bus_id`, `user_id`, `user_name`, `date`, `cost`, `paid`) VALUES ('','$bID','$usID','$user','$dt','$fee', '0')";
 	$qry = mysqli_query($dbc, $sql);
 	
 	if($qry){

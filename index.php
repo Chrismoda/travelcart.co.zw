@@ -19,120 +19,131 @@ if(func::checkLoginState($dbh)){
 		while ($rs = mysqli_fetch_assoc($uqqry)) {
 			$dat = $rs['date'];
 			$bus = $rs['bus_id'];
-
-			$bsql = "";
+			$order = $rs['order_id'];
+			$bsql = "SELECT * FROM `posts` WHERE `post_id`='$bus'";
 			$bqry = mysqli_query($dbc, $bsql);
 			$brs = mysqli_fetch_assoc($bqry);
 			$route = $brs['post_title'];
-			if ($rs['paid'] == 0) {
-				$date1=date_create($dat);
-				$date2=date_create(date('Y-m-d'));
-				$diff=date_diff($date1,$date2);
-				$actuaDF = ltrim($diff->format("%R%a"),'-');
 
-				$adf = $actuaDF;
-				//send email with notification
-				
-				$data = json_encode(array(
-						"category"=>"3",
-						"email"=> $us,
-						"message"=>"Your bus booking for route ".$route." has been left with ".$adf." days for payment. Please proceed to payment before deadline day of payment passes in ".$adf." days. Failure will result in booking being added to day of travel available seats for on site bus booking. "
-				));
-		
-		
-				$curl = curl_init();
-		
-				curl_setopt_array($curl, array(
-					CURLOPT_URL => "http://mail.teamvelocity.co.zw",
-					CURLOPT_RETURNTRANSFER => true,
-					CURLOPT_ENCODING => "",
-					CURLOPT_MAXREDIRS => 10,
-					CURLOPT_TIMEOUT => 30,
-					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-					CURLOPT_CUSTOMREQUEST => "POST",
-					CURLOPT_POSTFIELDS => $data,
-					CURLOPT_HTTPHEADER => array(
-						"Content-Type: application/json",
-						"cache-control: no-cache"
-					),
-				));
-		
-				$response = curl_exec($curl);
-				$err = curl_error($curl);
-		
-				curl_close($curl);
-		
-				if ($err) {
+			$ntsql = "SELECT * FROM `notif` WHERE `orderID`= '$order' AND `dt` < now() AND `status` = '1'";
+			$ntqry = mysqli_query($dbc, $ntsql);
+
+			if (mysqli_num_rows() != 0) {
+				# do nothing, maybe just show on the bar...
+			}else{
+				if ($rs['paid'] == 0) {
+					$date1=date_create($dat);
+					$date2=date_create(date('Y-m-d'));
+					$diff=date_diff($date1,$date2);
+					$actuaDF = ltrim($diff->format("%R%a"),'-');
+
+					$adf = $actuaDF;
+					//send email with notification
 					
-				} else {
-					$rs = json_decode($response,true);
-					if($rs['status'] == "Sent"){
-						//show notification on bar
-					}else{
+					$data = json_encode(array(
+							"category"=>"3",
+							"email"=> $us,
+							"message"=>"Your bus booking for route ".$route." has been left with ".$adf." days for payment. Please proceed to payment before deadline day of payment passes in ".$adf." days. Failure will result in booking being added to day of travel available seats for on site bus booking. "
+					));
+			
+			
+					$curl = curl_init();
+			
+					curl_setopt_array($curl, array(
+						CURLOPT_URL => "http://mail.teamvelocity.co.zw",
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_ENCODING => "",
+						CURLOPT_MAXREDIRS => 10,
+						CURLOPT_TIMEOUT => 30,
+						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+						CURLOPT_CUSTOMREQUEST => "POST",
+						CURLOPT_POSTFIELDS => $data,
+						CURLOPT_HTTPHEADER => array(
+							"Content-Type: application/json",
+							"cache-control: no-cache"
+						),
+					));
+			
+					$response = curl_exec($curl);
+					$err = curl_error($curl);
+			
+					curl_close($curl);
+			
+					if ($err) {
+						
+					} else {
+						$rs = json_decode($response,true);
+						if($rs['status'] == "Sent"){
+							//show notification on bar
+							$ssql = "INSERT INTO `notif`(`id`, `orderID`, `dt`, `status`) VALUES ('','$order',now(),'1')";
+							$ssqqql = mysqli_query($dbc, $ssql);
+						}else{
+							
+						}
+						
 						
 					}
-					
-					
-				}
-			}elseif ($rs['paid'] == 1) {
+				}elseif ($rs['paid'] == 1) {
 
-				$date1=date_create($dat);
-				$date2=date_create(date('Y-m-d'));
-				$diff=date_diff($date1,$date2);
-				$actuaDF = ltrim($diff->format("%R%a"),'-');
-				$adf = $actuaDF;
-				//send email with notification on closing on travel Date
-				if ($actuaDF <= 2) {
-					$data = json_encode(array(
-							"category"=>"4",
-							"email"=> $us,
-							"message"=>"Your bus booking for route ".$route." has been left with ".$adf." days for travel. Please remember to update your calender and please note that you can no longer postpone travel to a later date for the minimum of 2 days notice has elapsed"
-					));
-				}else{
-					$data = json_encode(array(
-							"category"=>"4",
-							"email"=> $us,
-							"message"=>"Your bus booking for route ".$route." has been left with ".$adf." days for travel. Please remember to update your calender or postpone travel to a later before 2 days of travel"
-					));
-				}
-				
-		
-		
-				$curl = curl_init();
-		
-				curl_setopt_array($curl, array(
-					CURLOPT_URL => "http://mail.teamvelocity.co.zw",
-					CURLOPT_RETURNTRANSFER => true,
-					CURLOPT_ENCODING => "",
-					CURLOPT_MAXREDIRS => 10,
-					CURLOPT_TIMEOUT => 30,
-					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-					CURLOPT_CUSTOMREQUEST => "POST",
-					CURLOPT_POSTFIELDS => $data,
-					CURLOPT_HTTPHEADER => array(
-						"Content-Type: application/json",
-						"cache-control: no-cache"
-					),
-				));
-		
-				$response = curl_exec($curl);
-				$err = curl_error($curl);
-		
-				curl_close($curl);
-		
-				if ($err) {
-					
-				} else {
-					$rs = json_decode($response,true);
-					if($rs['status'] == "Sent"){
-						//show notification on bar
+					$date1=date_create($dat);
+					$date2=date_create(date('Y-m-d'));
+					$diff=date_diff($date1,$date2);
+					$actuaDF = ltrim($diff->format("%R%a"),'-');
+					$adf = $actuaDF;
+					//send email with notification on closing on travel Date
+					if ($actuaDF <= 2) {
+						$data = json_encode(array(
+								"category"=>"4",
+								"email"=> $us,
+								"message"=>"Your bus booking for route ".$route." has been left with ".$adf." days for travel. Please remember to update your calender and please note that you can no longer postpone travel to a later date for the minimum of 2 days notice has elapsed"
+						));
 					}else{
-						
+						$data = json_encode(array(
+								"category"=>"4",
+								"email"=> $us,
+								"message"=>"Your bus booking for route ".$route." has been left with ".$adf." days for travel. Please remember to update your calender or postpone travel to a later before 2 days of travel"
+						));
 					}
 					
-					
-				}
+			
+			
+					$curl = curl_init();
+			
+					curl_setopt_array($curl, array(
+						CURLOPT_URL => "http://mail.teamvelocity.co.zw",
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_ENCODING => "",
+						CURLOPT_MAXREDIRS => 10,
+						CURLOPT_TIMEOUT => 30,
+						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+						CURLOPT_CUSTOMREQUEST => "POST",
+						CURLOPT_POSTFIELDS => $data,
+						CURLOPT_HTTPHEADER => array(
+							"Content-Type: application/json",
+							"cache-control: no-cache"
+						),
+					));
+			
+					$response = curl_exec($curl);
+					$err = curl_error($curl);
+			
+					curl_close($curl);
+			
+					if ($err) {
+						
+					} else {
+						$rs = json_decode($response,true);
+						if($rs['status'] == "Sent"){
+							$ssql = "INSERT INTO `notif`(`id`, `orderID`, `dt`, `status`) VALUES ('','$order',now(),'1')";
+							$ssqqql = mysqli_query($dbc, $ssql);
+						}else{
+							
+						}
+						
+						
+					}
 
+				}
 			}
 		}
 
